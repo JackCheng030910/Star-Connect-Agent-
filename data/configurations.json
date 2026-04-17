@@ -1,0 +1,80 @@
+{
+  "colors": [
+    {"id": "obsidian_black", "name": "曜岩黑", "hex": "#0a0a0a", "type": "metallic", "price": 0},
+    {"id": "polar_white", "name": "北极白", "hex": "#f0f0f0", "type": "solid", "price": 0},
+    {"id": "iridium_silver", "name": "铱银色", "hex": "#c0c0c0", "type": "metallic", "price": 8800},
+    {"id": "spectral_blue", "name": "光谱蓝", "hex": "#1a3a6b", "type": "metallic", "price": 12800},
+    {"id": "emerald_green", "name": "翡翠绿", "hex": "#2d5a3d", "type": "metallic", "price": 12800},
+    {"id": "hyacinth_red", "name": "风信子红", "hex": "#8b1a2b", "type": "metallic", "price": 12800},
+    {"id": "graphite_grey", "name": "石墨灰", "hex": "#4a4a4a", "type": "metallic", "price": 8800},
+    {"id": "nautic_blue", "name": "航海蓝", "hex": "#1e3a5f", "type": "metallic", "price": 18800},
+    {"id": "designo_white", "name": "designo 钻石白", "hex": "#fafafa", "type": "designo", "price": 28800},
+    {"id": "designo_red", "name": "designo 铂金石红", "hex": "#6b1a2d", "type": "designo", "price": 28800}
+  ],
+  "wheels": [
+    {"id": "18_5spoke", "name": "18英寸五辐式轮毂", "size": 18, "style": "经典", "price": 0},
+    {"id": "19_amg_5spoke", "name": "19英寸AMG五辐双拼色轮毂", "size": 19, "style": "运动", "price": 8800},
+    {"id": "20_amg_multi", "name": "20英寸AMG多辐式轮毂", "size": 20, "style": "运动", "price": 16800},
+    {"id": "20_amg_cross", "name": "20英寸AMG交叉辐式锻造轮毂", "size": 20, "style": "高性能", "price": 28800},
+    {"id": "21_amg_multi", "name": "21英寸AMG多辐式轮毂", "size": 21, "style": "旗舰", "price": 38800}
+  ],
+  "interiors": [
+    {"id": "artico_black", "name": "ARTICO 皮革 黑色", "material": "ARTICO合成皮革", "color": "黑色", "price": 0},
+    {"id": "artico_beige", "name": "ARTICO 皮革 米色", "material": "ARTICO合成皮革", "color": "米色", "price": 0},
+    {"id": "nappa_black", "name": "Nappa 真皮 黑色", "material": "Nappa真皮", "color": "黑色", "price": 18800},
+    {"id": "nappa_saddle", "name": "Nappa 真皮 马鞍棕", "material": "Nappa真皮", "color": "马鞍棕", "price": 18800},
+    {"id": "nappa_porcelain", "name": "Nappa 真皮 瓷器白", "material": "Nappa真皮", "color": "瓷器白", "price": 18800},
+    {"id": "designo_nappa_red", "name": "designo Nappa 真皮 孟加拉红/黑", "material": "designo Nappa真皮", "color": "红黑双拼", "price": 38800},
+    {"id": "exclusive_nappa", "name": "Exclusive Nappa 真皮 钻石白/黑", "material": "Exclusive Nappa真皮", "color": "白黑双拼", "price": 48800}
+  ],
+  "packages": [
+    {
+      "id": "amg_line",
+      "name": "AMG Line 运动套件",
+      "description": "AMG风格前后保险杠、运动型座椅、AMG方向盘、运动悬挂",
+      "price": 28800,
+      "includes": ["AMG风格外观套件", "运动型座椅", "AMG方向盘", "运动悬挂降低15mm"]
+    },
+    {
+      "id": "night_package",
+      "name": "夜色套件",
+      "description": "黑色高光外观饰件、暗色尾灯、黑色轮毂",
+      "price": 12800,
+      "includes": ["黑色高光进气格栅", "暗色尾灯", "窗框黑色饰条"]
+    },
+    {
+      "id": "driving_assist_pro",
+      "name": "智能驾驶辅助增强包",
+      "description": "L2+级驾驶辅助、车道保持、自适应巡航、交通标志识别",
+      "price": 18800,
+      "includes": ["主动车道保持", "智能领航", "交通标志识别", "紧急避让辅助"]
+    },
+    {
+      "id": "burmester_3d",
+      "name": "Burmester 3D环绕立体声音响",
+      "description": "15个扬声器、710W输出功率、3D环绕声场",
+      "price": 28800,
+      "includes": ["15个高保真扬声器", "710W数字功放", "3D环绕声场技术"]
+    },
+    {
+      "id": "panoramic_roof",
+      "name": "全景天窗套件",
+      "description": "超大全景天窗、电动遮阳帘",
+      "price": 16800,
+      "includes": ["全景天窗", "电动遮阳帘", "防紫外线隔热玻璃"]
+    },
+    {
+      "id": "comfort_rear",
+      "name": "后排舒适套件",
+      "description": "后排电动调节座椅、座椅加热、后排遮阳帘",
+      "price": 22800,
+      "includes": ["后排电动座椅调节", "后排座椅加热", "后排电动遮阳帘", "后排USB-C充电口"]
+    }
+  ],
+  "trims": [
+    {"id": "sport", "name": "运动版", "description": "动感外观 + 运动悬挂"},
+    {"id": "luxury", "name": "豪华型", "description": "舒适配置 + 高级内饰"},
+    {"id": "amg", "name": "AMG版", "description": "AMG运动套件 + 高性能调校"},
+    {"id": "exclusive", "name": "先型特别版", "description": "限量配色 + 专属配置"}
+  ]
+}

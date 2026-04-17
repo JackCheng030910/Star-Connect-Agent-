@@ -1,0 +1,64 @@
+{
+  "maintenance_schedule": [
+    {"mileage": 10000, "months": 12, "type": "A保养", "items": ["更换机油机滤", "全车检查", "轮胎气压检测", "制动系统检查"], "estimatedCost": 1500, "duration": "1-2小时"},
+    {"mileage": 20000, "months": 24, "type": "B保养", "items": ["更换机油机滤", "更换空气滤清器", "更换空调滤清器", "制动液检查", "全车深度检查"], "estimatedCost": 3500, "duration": "2-3小时"},
+    {"mileage": 30000, "months": 36, "type": "A保养", "items": ["更换机油机滤", "全车检查", "火花塞检查", "变速箱油检查"], "estimatedCost": 1800, "duration": "1-2小时"},
+    {"mileage": 40000, "months": 48, "type": "B保养+", "items": ["更换机油机滤", "更换空气/空调滤清器", "更换制动液", "更换火花塞", "变速箱油评估"], "estimatedCost": 5500, "duration": "3-4小时"},
+    {"mileage": 60000, "months": 72, "type": "大保养", "items": ["更换机油机滤", "更换全部滤清器", "更换制动液", "更换火花塞", "更换变速箱油", "更换冷却液", "全车系统深度检查"], "estimatedCost": 12000, "duration": "4-6小时"}
+  ],
+  "common_faults": [
+    {
+      "code": "P0300",
+      "description": "多缸失火",
+      "severity": "高",
+      "possibleCauses": ["火花塞老化", "点火线圈故障", "燃油品质问题", "进气系统漏气"],
+      "suggestedAction": "建议立即预约检修，避免长时间行驶",
+      "estimatedCost": "500-3000元"
+    },
+    {
+      "code": "P0171",
+      "description": "燃油混合气过稀 (Bank 1)",
+      "severity": "中",
+      "possibleCauses": ["进气管路漏气", "MAF传感器脏污", "燃油泵压力不足", "喷油嘴堵塞"],
+      "suggestedAction": "建议尽快预约检查，短距离行驶可暂时安全",
+      "estimatedCost": "300-2000元"
+    },
+    {
+      "code": "C1200",
+      "description": "ABS 传感器信号异常",
+      "severity": "高",
+      "possibleCauses": ["ABS轮速传感器损坏", "传感器线路短路", "轮毂轴承间隙过大"],
+      "suggestedAction": "影响制动安全，建议立即预约修理",
+      "estimatedCost": "800-2500元"
+    },
+    {
+      "code": "P0420",
+      "description": "催化转化器效率低于阈值",
+      "severity": "中",
+      "possibleCauses": ["催化器老化", "氧传感器故障", "发动机燃烧不完全"],
+      "suggestedAction": "排放相关，建议预约检查，可能影响年检",
+      "estimatedCost": "1500-8000元"
+    },
+    {
+      "code": "U0100",
+      "description": "与ECM/PCM通信中断",
+      "severity": "高",
+      "possibleCauses": ["CAN总线故障", "ECU损坏", "线束接触不良"],
+      "suggestedAction": "多个系统可能受影响，建议拖车至4S店",
+      "estimatedCost": "1000-5000元"
+    }
+  ],
+  "service_centers": [
+    {"id": "sh_pudong", "name": "上海浦东之星", "address": "上海市浦东新区金科路3000号", "phone": "021-5888-XXXX", "openHours": "周一至周六 8:00-18:00"},
+    {"id": "bj_chaoyang", "name": "北京朝阳之星", "address": "北京市朝阳区东四环中路56号", "phone": "010-6588-XXXX", "openHours": "周一至周六 8:00-18:00"},
+    {"id": "gz_tianhe", "name": "广州天河之星", "address": "广州市天河区黄埔大道西568号", "phone": "020-8588-XXXX", "openHours": "周一至周六 8:30-17:30"},
+    {"id": "sz_nanshan", "name": "深圳南山之星", "address": "深圳市南山区科苑南路2288号", "phone": "0755-8688-XXXX", "openHours": "周一至周六 8:30-17:30"}
+  ],
+  "warranty": {
+    "basic": "3年不限公里数整车质保",
+    "powertrain": "3年不限公里数动力总成质保",
+    "battery_ev": "8年或16万公里电池质保 (EQ系列)",
+    "paint": "3年不限公里数漆面质保",
+    "rust": "12年不限公里数车身防锈质保"
+  }
+}
