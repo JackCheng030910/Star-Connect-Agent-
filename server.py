@@ -39,6 +39,28 @@ def serve_static(filename):
     return send_from_directory(".", filename)
 
 
+def _normalize_webhook_payload(source, payload):
+    event_type = payload.get("event_type") or payload.get("type") or "unknown"
+    return {
+        "source": source,
+        "event_type": event_type,
+        "external_id": payload.get("external_id") or payload.get("id") or payload.get("event_id"),
+        "name": payload.get("name") or payload.get("customer_name") or payload.get("contact_name"),
+        "phone": payload.get("phone") or payload.get("mobile") or payload.get("contact_phone"),
+        "vehicle_id": payload.get("vehicle_id") or payload.get("sku") or payload.get("model_id"),
+        "stage": payload.get("stage") or payload.get("lead_stage"),
+        "message": payload.get("message") or payload.get("content") or payload.get("summary"),
+        "raw": payload
+    }
+
+
+def _handle_webhook(source):
+    payload = request.json or {}
+    normalized = _normalize_webhook_payload(source, payload)
+    result = orchestrator.apply_webhook_event(source, normalized)
+    return jsonify(result)
+
+
 # ============ Chat API ============
 
 @app.route("/api/chat", methods=["POST"])
@@ -83,6 +105,11 @@ def chat():
     except Exception as e:
         result = {"reply": f"处理请求时出现错误：{str(e)}", "agent": agent_name}
 
+    handoff = orchestrator.detect_handoff(message, source_agent=agent_name, source_result=result)
+    if handoff:
+        orchestrator.record_event("handoff_triggered", handoff)
+        result["handoff"] = handoff
+
     # 记录Agent回复到上下文
     orchestrator.add_to_context("assistant", result.get("reply", ""), agent=agent_name)
 
@@ -92,6 +119,9 @@ def chat():
         "agent": result.get("agent", agent_name),
         "intent": intent,
         "user_profile": user_profile,
+        "lead_stage": route_info.get("lead_stage", orchestrator.lead_stage),
+        "lead_record": route_info.get("lead_record", orchestrator.lead_record),
+        "events": route_info.get("events", []),
         **{k: v for k, v in result.items() if k not in ("reply", "agent")}
     }
     return jsonify(response)
@@ -129,6 +159,44 @@ def configure_vehicle(vehicle_id):
     return jsonify(result)
 
 
+# ============ Lifecycle APIs ============
+
+@app.route("/api/lifecycle", methods=["GET"])
+def get_lifecycle():
+    """获取当前线索生命周期状态"""
+    return jsonify(orchestrator.get_lifecycle())
+
+
+@app.route("/api/lead/capture", methods=["POST"])
+def capture_lead():
+    """登记线索"""
+    payload = request.json or {}
+    return jsonify(orchestrator.capture_lead(payload))
+
+
+@app.route("/api/test-drive/request", methods=["POST"])
+def request_test_drive():
+    """发起试驾预约"""
+    payload = request.json or {}
+    result = orchestrator.request_test_drive(payload)
+
+    # 顺带调用售后预约能力，复用已有门店数据
+    service_result = service_advisor.create_appointment(
+        payload.get("center_id", "sh_pudong"),
+        payload.get("date", result["date"]),
+        payload.get("service_type", "试驾预约")
+    )
+    result["service_booking"] = service_result
+    return jsonify(result)
+
+
+@app.route("/api/deal/quote", methods=["POST"])
+def create_quote():
+    """生成报价/推进成交"""
+    payload = request.json or {}
+    return jsonify(orchestrator.create_quote(payload))
+
+
 # ============ Service APIs ============
 
 @app.route("/api/service/diagnose", methods=["POST"])
@@ -150,6 +218,26 @@ def create_appointment():
         data.get("service_type", "")
     )
     return jsonify(result)
+
+
+# ============ Webhook Skeletons ============
+
+@app.route("/api/webhooks/wecom", methods=["POST"])
+def wecom_webhook():
+    """企业微信 webhook 骨架"""
+    return _handle_webhook("wecom")
+
+
+@app.route("/api/webhooks/crm", methods=["POST"])
+def crm_webhook():
+    """CRM webhook 骨架"""
+    return _handle_webhook("crm")
+
+
+@app.route("/api/webhooks/dms", methods=["POST"])
+def dms_webhook():
+    """DMS webhook 骨架"""
+    return _handle_webhook("dms")
 
 
 # ============ Public Sales Dataset API ============

@@ -3,6 +3,7 @@ Orchestrator - 智能路由协调器
 负责意图识别、Agent路由、上下文管理和多Agent协作编排
 """
 import re
+from datetime import datetime, timezone
 from agents.llm_interface import llm
 
 
@@ -14,8 +15,9 @@ class Orchestrator:
             "keywords": ["买车", "选车", "推荐", "预算", "车型", "对比", "哪款",
                          "多少钱", "价格", "价位", "适合", "家用", "商务", "代步",
                          "轿车", "suv", "新车", "购车", "性价比", "优惠", "促销",
-                         "试驾", "提车", "首付", "分期", "贷款", "落地价",
-                         "置换", "旧车", "换车"],
+                         "试驾", "提车", "首付", "分期", "贷款", "金融", "落地价",
+                         "置换", "旧车", "换车", "报价", "报价单", "合同", "定金",
+                         "下定", "订车", "锁单", "成交", "交付", "交车"],
             "agent": "sales_consultant"
         },
         "configure": {
@@ -46,14 +48,261 @@ class Orchestrator:
 
     def __init__(self):
         self.context = []  # 对话上下文
+        self.events = []  # 事件流，用于生命周期追踪
         self.current_agent = None
         self.current_vehicle = None  # 当前讨论的车型
+        self.lead_stage = "lead_generation"
+        self.lead_record = {
+            "id": None,
+            "name": None,
+            "phone": None,
+            "source": "chat",
+            "preferred_vehicle": None,
+            "stage": self.lead_stage,
+            "notes": []
+        }
         self.user_profile = {
             "budget": None,
             "usage": None,
             "preferences": [],
             "family_size": None,
             "interested_vehicles": []
+        }
+
+    def _now(self):
+        return datetime.now(timezone.utc).isoformat()
+
+    def record_event(self, event_type, payload=None):
+        event = {
+            "id": len(self.events) + 1,
+            "type": event_type,
+            "timestamp": self._now(),
+            "payload": payload or {}
+        }
+        self.events.append(event)
+        if len(self.events) > 100:
+            self.events = self.events[-100:]
+        return event
+
+    def _infer_stage(self, message, intent, agent_name):
+        message_lower = message.lower()
+
+        closing_keywords = ["成交", "交付", "交车", "提车", "下定", "定金", "合同", "锁单", "报价", "报价单", "金融", "贷款", "审批"]
+        showroom_keywords = ["试驾", "到店", "展厅", "看车", "现车", "预约", "到门店", "门店"]
+        lead_keywords = ["留资", "电话", "微信", "名片", "联系", "预算", "推荐", "了解", "咨询"]
+
+        if any(keyword in message_lower for keyword in closing_keywords):
+            return "closing"
+        if any(keyword in message_lower for keyword in showroom_keywords):
+            return "showroom_test_drive"
+        if any(keyword in message_lower for keyword in lead_keywords):
+            return "lead_generation"
+        if agent_name == "service_advisor":
+            return "aftersales"
+        return self.lead_stage
+
+    def _sync_lead_record(self, message):
+        message_lower = message.lower()
+
+        if not self.lead_record["id"]:
+            self.lead_record["id"] = f"LEAD-{datetime.now().strftime('%Y%m%d%H%M%S')}"
+
+        if self.user_profile.get("budget"):
+            budget_note = f"预算约{self.user_profile['budget']}元"
+            if budget_note not in self.lead_record["notes"]:
+                self.lead_record["notes"].append(budget_note)
+
+        if self.current_vehicle:
+            self.lead_record["preferred_vehicle"] = self.current_vehicle
+
+        phone_match = re.search(r'(1[3-9]\d{9})', message_lower)
+        if phone_match:
+            self.lead_record["phone"] = phone_match.group(1)
+
+        name_match = re.search(r'(?:我叫|名字叫|姓名是|我是)\s*([\u4e00-\u9fa5]{2,4})', message)
+        if name_match:
+            self.lead_record["name"] = name_match.group(1)
+
+        if self.current_vehicle and self.current_vehicle not in self.user_profile["interested_vehicles"]:
+            self.user_profile["interested_vehicles"].append(self.current_vehicle)
+
+    def _set_stage(self, stage, trigger=None):
+        if stage and stage != self.lead_stage:
+            self.lead_stage = stage
+            self.lead_record["stage"] = stage
+            self.record_event("stage_change", {"stage": stage, "trigger": trigger})
+
+    def capture_lead(self, payload):
+        name = (payload.get("name") or "").strip()
+        phone = (payload.get("phone") or "").strip()
+        source = (payload.get("source") or "chat").strip()
+        preferred_vehicle = (payload.get("preferred_vehicle") or "").strip()
+        notes = (payload.get("notes") or "").strip()
+
+        if not self.lead_record["id"]:
+            self.lead_record["id"] = f"LEAD-{datetime.now().strftime('%Y%m%d%H%M%S')}"
+
+        if name:
+            self.lead_record["name"] = name
+        if phone:
+            self.lead_record["phone"] = phone
+        if source:
+            self.lead_record["source"] = source
+        if preferred_vehicle:
+            self.lead_record["preferred_vehicle"] = preferred_vehicle
+        if notes:
+            self.lead_record["notes"].append(notes)
+
+        self._set_stage("lead_generation", trigger="capture_lead")
+        event = self.record_event("lead_captured", self.lead_record.copy())
+        return {"lead": self.lead_record.copy(), "event": event}
+
+    def request_test_drive(self, payload):
+        vehicle_id = (payload.get("vehicle_id") or self.current_vehicle or "").strip()
+        preferred_date = (payload.get("date") or "待确认").strip()
+        location = (payload.get("location") or "展厅").strip()
+
+        if vehicle_id:
+            self.lead_record["preferred_vehicle"] = vehicle_id
+
+        self._set_stage("showroom_test_drive", trigger="request_test_drive")
+        appointment_id = f"TD-{len(self.events) + 1:04d}"
+        event = self.record_event("test_drive_requested", {
+            "appointment_id": appointment_id,
+            "vehicle_id": vehicle_id,
+            "date": preferred_date,
+            "location": location
+        })
+        return {
+            "appointment_id": appointment_id,
+            "vehicle_id": vehicle_id,
+            "date": preferred_date,
+            "location": location,
+            "stage": self.lead_stage,
+            "event": event
+        }
+
+    def create_quote(self, payload):
+        vehicle_id = (payload.get("vehicle_id") or self.current_vehicle or "").strip()
+        budget = payload.get("budget") or self.user_profile.get("budget")
+        finance = (payload.get("finance") or "").strip()
+
+        if vehicle_id:
+            self.lead_record["preferred_vehicle"] = vehicle_id
+
+        self._set_stage("closing", trigger="create_quote")
+        quote_id = f"Q-{len(self.events) + 1:04d}"
+        event = self.record_event("quote_created", {
+            "quote_id": quote_id,
+            "vehicle_id": vehicle_id,
+            "budget": budget,
+            "finance": finance
+        })
+        return {
+            "quote_id": quote_id,
+            "vehicle_id": vehicle_id,
+            "budget": budget,
+            "finance": finance,
+            "stage": self.lead_stage,
+            "event": event
+        }
+
+    def get_lifecycle(self):
+        return {
+            "lead_stage": self.lead_stage,
+            "lead": self.lead_record,
+            "events": self.events[-20:],
+            "recommended_action": {
+                "lead_generation": "补充客户画像并邀约试驾",
+                "showroom_test_drive": "安排试驾路线与到店体验",
+                "closing": "推进报价、金融与成交确认",
+                "aftersales": "跟进故障诊断与维保预约"
+            }.get(self.lead_stage, "继续收集客户信息")
+        }
+
+    def detect_handoff(self, message, source_agent=None, source_result=None):
+        """检测跨部门转接触发器"""
+        message_lower = message.lower()
+
+        if isinstance(source_result, dict) and source_result.get("handoff"):
+            handoff = dict(source_result["handoff"])
+            handoff.setdefault("source_agent", source_agent)
+            handoff.setdefault("trigger", "agent_request")
+            return handoff
+
+        service_to_sales_keywords = [
+            "换车", "置换", "旧车", "新车", "报价", "报价单", "金融", "首付",
+            "分期", "贷款", "订车", "提车", "成交", "交付", "想买新车", "看新车",
+            "以旧换新", "补贴", "残值", "trade-in"
+        ]
+        sales_to_service_keywords = [
+            "保养", "维修", "故障", "售后", "质保", "预约", "机油", "刹车",
+            "灯亮", "异响", "抖动", "维修记录", "频繁维修", "车龄", "老车"
+        ]
+
+        if source_agent == "service_advisor" and any(keyword in message_lower for keyword in service_to_sales_keywords):
+            return {
+                "source_agent": "service_advisor",
+                "target_agent": "sales_consultant",
+                "trigger": "service_to_sales",
+                "reason": "客户出现换车/置换/报价/金融诉求，需要转交销售顾问继续承接",
+                "message": "我先继续帮您处理售后信息，同时建议转接销售顾问继续跟进新车、置换和金融方案。"
+            }
+
+        if source_agent == "sales_consultant" and any(keyword in message_lower for keyword in sales_to_service_keywords):
+            return {
+                "source_agent": "sales_consultant",
+                "target_agent": "service_advisor",
+                "trigger": "sales_to_service",
+                "reason": "客户显式转入保养/维修/质保诉求，需要转交售后顾问",
+                "message": "我先把您的购车需求记下，同时建议转接售后顾问继续承接保养和维修信息。"
+            }
+
+        return None
+
+    def apply_webhook_event(self, source, payload):
+        """应用外部系统事件到本地生命周期状态"""
+        normalized = {
+            "source": source,
+            "event_type": payload.get("event_type") or payload.get("type") or "unknown",
+            "external_id": payload.get("external_id") or payload.get("id"),
+            "name": payload.get("name") or payload.get("customer_name"),
+            "phone": payload.get("phone") or payload.get("mobile"),
+            "vehicle_id": payload.get("vehicle_id") or payload.get("sku"),
+            "stage": payload.get("stage"),
+            "message": payload.get("message") or payload.get("content"),
+            "raw": payload
+        }
+
+        event = self.record_event(f"webhook_{source}_received", normalized)
+
+        if normalized["name"]:
+            self.lead_record["name"] = normalized["name"]
+        if normalized["phone"]:
+            self.lead_record["phone"] = normalized["phone"]
+        if normalized["vehicle_id"]:
+            self.lead_record["preferred_vehicle"] = normalized["vehicle_id"]
+            self.current_vehicle = normalized["vehicle_id"]
+        if normalized["stage"]:
+            self._set_stage(normalized["stage"], trigger=f"webhook:{source}")
+
+        if source == "dms" and normalized["vehicle_id"]:
+            note = f"DMS同步车辆：{normalized['vehicle_id']}"
+            if note not in self.lead_record["notes"]:
+                self.lead_record["notes"].append(note)
+
+        if source == "crm":
+            crm_note = f"CRM事件：{normalized['event_type']}"
+            if crm_note not in self.lead_record["notes"]:
+                self.lead_record["notes"].append(crm_note)
+
+        return {
+            "accepted": True,
+            "source": source,
+            "normalized": normalized,
+            "event": event,
+            "lead_stage": self.lead_stage,
+            "lead_record": self.lead_record
         }
 
     def classify_intent(self, message):
@@ -129,6 +378,8 @@ class Orchestrator:
         for keyword, vid in vehicle_keywords.items():
             if keyword in message_lower:
                 self.current_vehicle = vid
+                if vid not in self.user_profile["interested_vehicles"]:
+                    self.user_profile["interested_vehicles"].append(vid)
 
     def add_to_context(self, role, content, agent=None):
         """添加对话记录到上下文"""
@@ -146,6 +397,16 @@ class Orchestrator:
         self.update_user_profile(message)
         agent_name, intent, is_quotes_query = self.classify_intent(message)
         self.current_agent = agent_name
+        stage = self._infer_stage(message, intent, agent_name)
+        self._set_stage(stage, trigger=intent)
+        self._sync_lead_record(message)
+        self.record_event("message_received", {
+            "message": message,
+            "agent": agent_name,
+            "intent": intent,
+            "stage": self.lead_stage,
+            "current_vehicle": self.current_vehicle
+        })
         
         # ======== MoE & LoRA Framework Simulation Log ========
         lora_map = {
@@ -168,7 +429,10 @@ class Orchestrator:
             "is_quotes_query": is_quotes_query,
             "context": self.context,
             "user_profile": self.user_profile,
-            "current_vehicle": self.current_vehicle
+            "current_vehicle": self.current_vehicle,
+            "lead_stage": self.lead_stage,
+            "lead_record": self.lead_record,
+            "events": self.events[-10:]
         }
 
     def get_status(self):
@@ -206,6 +470,9 @@ class Orchestrator:
         return {
             "agents": agents_info,
             "current_agent": self.current_agent,
+            "lead_stage": self.lead_stage,
+            "lead_record": self.lead_record,
+            "event_count": len(self.events),
             "user_profile": self.user_profile,
             "conversation_length": len(self.context)
         }

@@ -12,6 +12,12 @@ DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data")
 class ServiceAdvisor:
     """售后服务助理Agent"""
 
+    HANDOFF_KEYWORDS = [
+        "换车", "置换", "旧车", "新车", "报价", "报价单", "金融", "首付",
+        "分期", "贷款", "订车", "提车", "成交", "交付", "以旧换新", "补贴",
+        "残值", "trade-in", "想买新车", "看新车"
+    ]
+
     SYSTEM_PROMPT = """你是梅赛德斯-奔驰的专属售后服务顾问"守护"，**你的职责仅限且专注于售后服务领域**（保养提醒、维修预约、故障诊断、质保查询等）。
 
 你的风格：专业、关怀、可靠、有同理心，避免机械死板和格式化的长篇大论。
@@ -36,8 +42,27 @@ class ServiceAdvisor:
         except Exception:
             return {}
 
+    def _detect_handoff(self, message):
+        message_lower = message.lower()
+        if any(keyword in message_lower for keyword in self.HANDOFF_KEYWORDS):
+            return {
+                "target_agent": "sales_consultant",
+                "trigger": "service_to_sales",
+                "reason": "客户出现换车、置换、报价或金融诉求，需要销售顾问继续承接",
+                "message": "这个需求已经从售后延伸到换新和置换了，我建议直接转接销售顾问星辰继续帮您承接。"
+            }
+        return None
+
     def handle(self, message, context=None, user_profile=None):
         """处理售后服务消息"""
+        handoff = self._detect_handoff(message)
+        if handoff:
+            return {
+                "reply": handoff["message"],
+                "agent": "service_advisor",
+                "handoff": handoff
+            }
+
         if llm.get_mode() == "openai":
             enhanced_prompt = self.SYSTEM_PROMPT + "\n\n服务规则：\n" + \
                 json.dumps(self.service_rules, ensure_ascii=False, indent=2)
@@ -50,6 +75,14 @@ class ServiceAdvisor:
     def _simulation_response(self, message):
         """模拟模式回复"""
         message_lower = message.lower()
+
+        handoff = self._detect_handoff(message)
+        if handoff:
+            reply = (
+                "我先继续帮您处理当前售后信息，同时这个需求已经更偏向换车/置换/金融方案。"
+                "我建议直接转接销售顾问星辰继续跟进，避免信息重复。"
+            )
+            return {"reply": reply, "agent": "service_advisor", "handoff": handoff}
 
         # 保养相关
         if any(w in message_lower for w in ["保养", "多久", "里程", "机油"]):

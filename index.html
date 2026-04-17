@@ -163,6 +163,14 @@
             <div class="stat-label">活跃 LoRA 微调权重</div>
             <div class="stat-value" id="statLora" style="font-size: 1.1rem; color: var(--benz-star-blue);">—</div>
           </div>
+          <div class="stat-card">
+            <div class="stat-label">客户阶段</div>
+            <div class="stat-value" id="statStage" style="font-size: 1.1rem; color: var(--benz-gold);">线上留资引流</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">事件流</div>
+            <div class="stat-value" id="statEvents" style="font-size: 1.1rem; color: var(--benz-success);">0条</div>
+          </div>
         </div>
 
         <div class="profile-section">
@@ -184,6 +192,35 @@
               <span class="profile-key">偏好车型</span>
               <span class="profile-value" id="profilePreferences">待采集</span>
             </div>
+            <div class="profile-item">
+              <span class="profile-key">线索编号</span>
+              <span class="profile-value" id="leadId">待生成</span>
+            </div>
+            <div class="profile-item">
+              <span class="profile-key">意向车型</span>
+              <span class="profile-value" id="leadVehicle">待采集</span>
+            </div>
+            <div class="profile-item">
+              <span class="profile-key">联系方式</span>
+              <span class="profile-value" id="leadPhone">待采集</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="workflow-section">
+          <div class="profile-title">业务闭环操作</div>
+          <div class="workflow-actions">
+            <button class="workflow-btn" data-action="lead">登记线索</button>
+            <button class="workflow-btn" data-action="test-drive">预约试驾</button>
+            <button class="workflow-btn" data-action="quote">生成报价</button>
+          </div>
+          <div class="workflow-hint" id="stageAction">继续推进客户旅程</div>
+        </div>
+
+        <div class="timeline-section">
+          <div class="profile-title">事件时间线</div>
+          <div id="eventTimeline" class="event-timeline">
+            <div class="timeline-empty">尚未产生事件，先从留资或试驾开始。</div>
           </div>
         </div>
       </div>

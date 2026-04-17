@@ -14,7 +14,10 @@ const state = {
   vehicles: [],
   quotes: [],
   conversationCount: 0,
-  currentAgent: 'sales_consultant'
+  currentAgent: 'sales_consultant',
+  leadStage: 'lead_generation',
+  lifecycle: null,
+  eventCount: 0
 };
 
 // ============ DOM References ============
@@ -33,7 +36,9 @@ document.addEventListener('DOMContentLoaded', () => {
   initModeSwitch();
   initModal();
   loadVehicles();
+  loadLifecycle();
   initQuickActions();
+  initWorkflowActions();
 });
 
 // ============ Navigation ============
@@ -95,6 +100,11 @@ function initChat() {
 function initQuickActions() {
   $$('.quick-btn').forEach(btn => {
     btn.addEventListener('click', () => {
+      if (btn.dataset.action) {
+        handleWorkflowAction(btn.dataset.action);
+        return;
+      }
+
       const prompt = btn.dataset.prompt;
       if (prompt) {
         chatInput.value = prompt;
@@ -146,6 +156,12 @@ async function sendMessage() {
     // Add bot reply
     appendMessage('bot', data.reply, data.agent);
 
+    if (data.handoff && data.handoff.target_agent) {
+      updateActiveAgent(data.handoff.target_agent);
+      state.currentAgent = data.handoff.target_agent;
+      appendMessage('bot', data.handoff.message || `🔁 已自动转接至 ${data.handoff.target_agent}，继续为您承接后续需求。`, 'system');
+    }
+
     // Update conversation count
     state.conversationCount++;
 
@@ -157,6 +173,12 @@ async function sendMessage() {
     // Update user profile
     if (data.user_profile) {
       updateProfileDisplay(data.user_profile);
+    }
+
+    if (data.lead_stage || data.events) {
+      state.leadStage = data.lead_stage || state.leadStage;
+      state.eventCount = Array.isArray(data.events) ? data.events.length : state.eventCount;
+      updateLifecycleDisplay(data);
     }
 
   } catch (error) {
@@ -304,6 +326,162 @@ function initModeSwitch() {
   });
 }
 
+function initWorkflowActions() {
+  $$('.workflow-btn').forEach(btn => {
+    btn.addEventListener('click', () => handleWorkflowAction(btn.dataset.action));
+  });
+}
+
+async function handleWorkflowAction(action) {
+  if (action === 'lead') {
+    await captureLeadDialog();
+  } else if (action === 'test-drive') {
+    await requestTestDriveDialog();
+  } else if (action === 'quote') {
+    await createQuoteDialog();
+  }
+}
+
+async function captureLeadDialog() {
+  const name = window.prompt('客户姓名（可留空）', '');
+  const phone = window.prompt('客户手机号（可留空）', '');
+  const vehicle = window.prompt('意向车型（例如：GLE 450 / EQE 350+）', 'GLE 450');
+  const notes = window.prompt('补充备注（例如：预算、用途、竞品）', '预算70万，关注后排和试驾体验');
+
+  try {
+    const response = await fetch(`${API_BASE}/lead/capture`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, phone, preferred_vehicle: vehicle, notes, source: 'frontend' })
+    });
+    const data = await response.json();
+    appendMessage('bot', `已登记线索：${data.lead?.id || 'SUCCESS'}，当前阶段：${formatStageLabel(data.lead?.stage || 'lead_generation')}`, 'sales_consultant');
+    await loadLifecycle();
+  } catch (error) {
+    appendMessage('bot', '线索登记失败，请确认后端已启动。', 'system');
+  }
+}
+
+async function requestTestDriveDialog() {
+  const vehicle = window.prompt('试驾车型（例如：GLE 450 / S 450 L）', 'GLE 450');
+  const date = window.prompt('试驾时间（例如：4月20日 14:00）', '4月20日 14:00');
+  const location = window.prompt('门店或地点', '上海浦东之星');
+
+  try {
+    const response = await fetch(`${API_BASE}/test-drive/request`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ vehicle_id: vehicle, date, location })
+    });
+    const data = await response.json();
+    appendMessage('bot', `试驾已创建：${data.appointment_id}，当前阶段：${formatStageLabel(data.stage || 'showroom_test_drive')}`, 'sales_consultant');
+    await loadLifecycle();
+  } catch (error) {
+    appendMessage('bot', '试驾预约失败，请确认后端已启动。', 'system');
+  }
+}
+
+async function createQuoteDialog() {
+  const vehicle = window.prompt('报价车型（例如：EQS 450+ / GLC 300 L）', 'EQS 450+');
+  const budget = window.prompt('预算或总价（例如：90万）', '90万');
+  const finance = window.prompt('金融方案偏好（可留空）', '分期 / 融资租赁');
+
+  try {
+    const response = await fetch(`${API_BASE}/deal/quote`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ vehicle_id: vehicle, budget, finance })
+    });
+    const data = await response.json();
+    appendMessage('bot', `报价已生成：${data.quote_id}，当前阶段：${formatStageLabel(data.stage || 'closing')}`, 'sales_consultant');
+    await loadLifecycle();
+  } catch (error) {
+    appendMessage('bot', '报价生成失败，请确认后端已启动。', 'system');
+  }
+}
+
+async function loadLifecycle() {
+  try {
+    const response = await fetch(`${API_BASE}/lifecycle`);
+    const data = await response.json();
+    state.lifecycle = data;
+    state.leadStage = data.lead_stage || state.leadStage;
+    state.eventCount = Array.isArray(data.events) ? data.events.length : state.eventCount;
+    updateLifecycleDisplay(data);
+  } catch (error) {
+    console.debug('Lifecycle API unavailable:', error);
+  }
+}
+
+function formatStageLabel(stage) {
+  const labels = {
+    lead_generation: '线上留资引流',
+    showroom_test_drive: '展厅体验与试驾',
+    closing: '逼单交付',
+    aftersales: '售后跟进'
+  };
+  return labels[stage] || stage;
+}
+
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function updateLifecycleDisplay(data) {
+  if (!data) return;
+  const stage = data.lead_stage || state.leadStage;
+  const lead = data.lead || {};
+
+  const stageEl = $('#statStage');
+  if (stageEl) stageEl.textContent = formatStageLabel(stage);
+
+  const eventEl = $('#statEvents');
+  if (eventEl) eventEl.textContent = `${Array.isArray(data.events) ? data.events.length : state.eventCount}条`;
+
+  const actionEl = $('#stageAction');
+  if (actionEl) actionEl.textContent = data.recommended_action || '继续推进客户旅程';
+
+  const leadIdEl = $('#leadId');
+  if (leadIdEl) leadIdEl.textContent = lead.id || '待生成';
+
+  const leadVehicleEl = $('#leadVehicle');
+  if (leadVehicleEl) leadVehicleEl.textContent = lead.preferred_vehicle || '待采集';
+
+  const leadPhoneEl = $('#leadPhone');
+  if (leadPhoneEl) leadPhoneEl.textContent = lead.phone || '待采集';
+
+  renderEventTimeline(data.events || []);
+}
+
+function renderEventTimeline(events) {
+  const container = $('#eventTimeline');
+  if (!container) return;
+
+  if (!events.length) {
+    container.innerHTML = '<div class="timeline-empty">尚未产生事件，先从留资或试驾开始。</div>';
+    return;
+  }
+
+  container.innerHTML = events.slice().reverse().map((event) => {
+    const payloadText = escapeHtml(JSON.stringify(event.payload || {}, null, 0));
+    return `
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-body">
+          <div class="timeline-title">${escapeHtml(event.type)}</div>
+          <div class="timeline-meta">${escapeHtml(new Date(event.timestamp).toLocaleString('zh-CN'))}</div>
+          <div class="timeline-text">${payloadText}</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
 async function switchMode(mode, apiKey = '', baseUrl = '', model = '') {
   try {
     const response = await fetch(`${API_BASE}/mode/switch`, {
@@ -446,6 +624,8 @@ function updateDashboard() {
   const loraVal = loraAdapters[state.currentAgent];
   $('#statLora').textContent = loraVal ? `${loraVal}` : '基础模型运行中';
   $('#statMode').textContent = state.currentMode === 'openai' ? 'OpenAI' : '模拟';
+  $('#statStage').textContent = formatStageLabel(state.leadStage);
+  $('#statEvents').textContent = `${state.eventCount}条`;
 }
 
 function updateProfileDisplay(profile) {
