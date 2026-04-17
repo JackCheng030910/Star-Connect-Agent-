@@ -2,6 +2,9 @@
 
 基于多智能体（Multi-Agent）协作架构的“梅赛德斯-奔驰智能客户体验平台”。该项目为【德勤精英赛】（Deloitte Elite Challenge）而打造，融合了 MoE 门控制导网络、LoRA 领域微调模拟以及大模型 RAG（检索增强生成）机制，覆盖了车辆销售、个性化配置、售后服务和座舱体验的全生命周期。
 
+当前版本已经补齐了最小可用的业务闭环：
+线索登记 -> 展厅试驾 -> 报价/成交推进 -> 售后转接，并提供企业微信 / CRM / DMS 的 webhook 骨架接口。
+
 ## 🌟 核心技术亮点
 
 1. **MoE 门控制导路由 (Mixture of Experts)**
@@ -12,6 +15,8 @@
    无缝融合 HuggingFace 的公共汽车销售话术数据集，销售节点可以直接以它为思考依托点进行话术优化对练。
 4. **全端业务联动**
    售后顾问发现高频维修老旧车型，会自动引导引流，触发销售节点接管，实现真实的商业闭环（Trade-in 老车置换转化）。
+5. **生命周期事件流**
+   系统会记录线索阶段、事件时间线和自动转接信号，便于在前端数据面板中查看客户旅程状态。
 
 ## 💡 快速开始 (复现步骤)
 
@@ -30,7 +35,7 @@ cd Star-Connect-Agent-
 ```bash
 pip install -r requirements.txt
 ```
-*(主要依赖：Flask, flask-cors, requests, python-dotenv, datasets, pandas, pyarrow)*
+*(当前核心依赖：Flask, flask-cors, python-dotenv, openai)*
 
 ### 4. 启动后端引擎
 在项目根目录执行：
@@ -39,11 +44,32 @@ python server.py
 ```
 > 你应该在终端中看到 `[*] Server starting on http://localhost:5000` 的提示，说明服务启动成功。
 
+> 如果你的系统里 `python` 命令不可用，请直接使用 Python 可执行文件启动，例如：
+> `C:/Users/jackcheng030910/AppData/Local/Programs/Python/Python311/python.exe server.py`
+
 ### 5. 访问前端界面
 打开你的浏览器，访问以下地址进入 BenzMind 操作控制台：
 ```
 http://localhost:5000
 ```
+
+### 6. 业务闭环入口
+前端数据面板现在提供三个直接入口：
+* `登记线索` — 创建客户线索并同步阶段
+* `预约试驾` — 生成试驾预约和事件记录
+* `生成报价` — 推进成交阶段并记录报价事件
+
+### 7. Webhook 骨架接口
+后端已预留三个外部系统接入入口，用于后续和企业微信、CRM、DMS 打通：
+* `POST /api/webhooks/wecom`
+* `POST /api/webhooks/crm`
+* `POST /api/webhooks/dms`
+
+同时提供生命周期查询与动作接口：
+* `GET /api/lifecycle`
+* `POST /api/lead/capture`
+* `POST /api/test-drive/request`
+* `POST /api/deal/quote`
 
 ---
 
@@ -64,3 +90,8 @@ http://localhost:5000
 * `data/` — 结构化的车辆知识库（vehicles.json）、配置选装数据及真实渲染车型实景图。
 * `server.py` — Flask API 总线及静态资源代理。
 * `index.html` / `app.js` / `styles.css` — 纯原生构建、开箱即用的前端交互端点。
+
+## 运行提示
+* 模拟模式默认可离线演示。
+* 切换到 OpenAI 模式前，请先配置 API Key 与 Base URL。
+* 如果你在 Windows 下遇到 `python` 命令不可用，优先使用完整 Python 路径启动。
