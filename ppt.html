@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Team C: 重塑销售旅程中的人机协作模式</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+/* 1. THE SETUP & GLOBAL STYLES */
+* {
+  box-sizing: border-box;
+}
+
+p {
+  margin: 0;
+  margin-bottom: 15px;
+}
+
+body {
+  background-color: #0b1121; /* Very dark slate/blue background */
+  display: grid;
+  gap: 30px;
+  grid-template-columns: 1fr;
+  margin: 0;
+  min-height: 100vh;
+  padding: 30px 0;
+  place-items: center;
+  font-family: 'Noto Sans SC', sans-serif;
+}
+
+.slide-container {
+  align-items: center;
+  background-color: #111827; /* Slightly lighter dark container */
+  border-radius: 12px;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  height: 720px;
+  justify-content: center;
+  overflow: hidden;
+  padding: 60px;
+  position: relative;
+  width: 1280px;
+  border: 1px solid #1f2937;
+}
+
+.slide-container::before {
+  content: '';
+  height: 100%;
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 100%;
+  z-index: 0;
+  /* Subtle dark gradient overlay */
+  background: radial-gradient(circle at top right, rgba(30, 58, 138, 0.1), transparent 50%),
+              radial-gradient(circle at bottom left, rgba(134, 188, 37, 0.05), transparent 50%);
+}
+
+.slide-container > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* 2. CONSISTENT TYPOGRAPHY & COLORS */
+/* Accent Green (Deloitte style): #86bc25 
+  Text Primary: #f8fafc
+  Text Secondary: #94a3b8
+*/
+
+.slide-container h1,
+.slide-container h2,
+.slide-container h3 {
+  color: #f8fafc;
+  font-weight: 700;
+  margin: 0;
+}
+
+.slide-container p,
+.slide-container li,
+.slide-container .subtitle,
+.slide-container .number-label,
+.slide-container .legend li,
+.slide-container .chart-summary,
+.slide-container .bar .label,
+.slide-container th,
+.slide-container td,
+.slide-container .alternating-text-tile p,
+.slide-container .bleed-text-side p {
+  color: #94a3b8;
+}
+
+/* Font Sizes */
+.slide-container h1 {
+  font-size: 64px;
+  line-height: 1.2;
+  margin-bottom: 20px;
+}
+
+.slide-container .slide-title {
+  font-size: 40px;
+  font-weight: 700;
+  margin-bottom: 45px;
+  text-align: left;
+  width: 100%;
+  border-left: 6px solid #86bc25;
+  padding-left: 20px;
+  line-height: 1.1;
+}
+
+.slide-container h3 {
+  font-size: 26px;
+  font-weight: 700;
+  margin-bottom: 15px;
+  color: #e2e8f0;
+}
+
+.slide-container p,
+.slide-container li,
+.slide-container .subtitle,
+.slide-container .legend li,
+.slide-container .chart-summary,
+.slide-container .bar .label,
+.slide-container td,
+.slide-container .bleed-text-side p {
+  font-size: 19px;
+  line-height: 1.6;
+}
+
+.slide-container .subtitle {
+  font-weight: 400;
+  margin: 20px auto;
+  font-size: 24px;
+  color: #86bc25; /* Accent color for subtitle */
+}
+
+.slide-container .content-area {
+  align-items: flex-start; /* Align content to top */
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  justify-content: flex-start;
+  width: 100%;
+}
+
+/* Highlight specific text */
+.highlight-text {
+  color: #86bc25;
+  font-weight: 700;
+}
+
+/* 3. LAYOUT DEFINITIONS */
+
+.title-layout {
+  text-align: center;
+  max-width: 1100px;
+}
+
+.title-layout hr {
+    width: 100px;
+    height: 4px;
+    background-color: #86bc25;
+    border: none;
+    margin: 30px auto;
+}
+
+.title-layout .mentor-info {
+    margin-top: 40px;
+    font-size: 18px;
+    color: #64748b;
+}
+
+.two-column {
+  align-items: flex-start;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 50px;
+  width: 100%;
+}
+
+.two-column.tiled {
+  align-items: stretch;
+}
+
+.two-column.tiled > div {
+  background-color: #1e293b;
+  border-radius: 12px;
+  border: 1px solid #334155;
+  padding: 40px;
+  text-align: left;
+  border-top: 4px solid #86bc25;
+}
+
+.two-column.tiled h3 {
+  color: #f8fafc;
+}
+
+.two-column ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.image-wrapper {
+  border-radius: 8px;
+  height: 420px;
+  max-width: 100%;
+  overflow: hidden;
+  width: 100%;
+  border: 1px solid #334155;
+}
+
+.image-wrapper img {
+  height: 100%;
+  max-width: 100%;
+  object-fit: cover; /* Changed to cover for a more immersive dark theme feel */
+  width: 100%;
+  opacity: 0.85; /* Slight opacity to blend with dark theme */
+}
+
+.image-right-layout .image-wrapper img {
+    object-fit: contain;
+    background-color: #1e293b;
+}
+
+.tiled-content {
+  align-items: stretch;
+  display: flex;
+  gap: 30px;
+  justify-content: center;
+  width: 100%;
+}
+
+.tile {
+  align-items: flex-start;
+  background-color: #1e293b;
+  border-radius: 12px;
+  border: 1px solid #334155;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  justify-content: flex-start;
+  padding: 35px 25px;
+  text-align: left;
+}
+
+.tile .icon {
+  color: #86bc25;
+  font-size: 40px;
+  margin-bottom: 25px;
+  background: rgba(134, 188, 37, 0.1);
+  padding: 15px;
+  border-radius: 8px;
+}
+
+/* Bleed Image Right */
+.slide-container.bleed-image-layout {
+  align-items: start;
+  display: grid;
+  gap: 50px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  padding: 0;
+}
+
+.slide-container.bleed-image-layout > .content-container {
+  padding: 60px 0 60px 60px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  justify-content: center;
+}
+
+.slide-container.bleed-image-layout > .image-container {
+  height: 720px;
+  overflow: hidden;
+  width: 100%;
+}
+
+.slide-container.bleed-image-layout img.bleed-image-side {
+  border-radius: 0;
+  display: block;
+  height: 720px;
+  object-fit: cover;
+  object-position: center;
+  width: 100%;
+  opacity: 0.7;
+}
+
+/* Styled Bullet Points */
+.bullet-list {
+  max-width: 1000px;
+  width: 100%;
+}
+
+.bullet-list ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.bullet-list li {
+  margin-bottom: 25px;
+  padding-left: 50px;
+  position: relative;
+  background-color: #1e293b;
+  padding: 25px 30px 25px 60px;
+  border-radius: 8px;
+  border-left: 4px solid #3b82f6;
+}
+
+.bullet-list i {
+  color: #86bc25;
+  font-size: 24px;
+  left: 20px;
+  position: absolute;
+  top: 28px;
+}
+
+.bullet-list li strong {
+  color: #e2e8f0;
+  font-weight: 700;
+  display: block;
+  margin-bottom: 5px;
+  font-size: 20px;
+}
+
+/* Area Chart Styles */
+.area-chart-container {
+  padding: 20px;
+  width: 95%;
+  background: #1e293b;
+  border-radius: 12px;
+  border: 1px solid #334155;
+  margin-top: 20px;
+}
+
+.area-chart-svg {
+  height: auto;
+  overflow: visible;
+  width: 100%;
+}
+
+.area-chart-svg .grid {
+  stroke-width: 1;
+  stroke: #334155;
+}
+
+.area-chart-svg .area-fill {
+  fill: url(#area-gradient);
+  stroke: none;
+}
+
+.area-chart-svg .line-stroke {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 4;
+  stroke: #86bc25;
+}
+
+.area-chart-svg .data-point {
+  fill: #0b1121;
+  stroke-width: 3;
+  stroke: #86bc25;
+}
+
+.area-chart-svg .axis-labels,
+.area-chart-svg .data-labels {
+  fill: #94a3b8;
+  font-size: 16px;
+  font-family: 'Noto Sans SC', sans-serif;
+}
+
+.area-chart-svg .y-axis-labels {
+  text-anchor: end;
+}
+
+.area-chart-svg .x-axis-labels {
+  text-anchor: middle;
+}
+
+/* Highlighted Numbers */
+.highlight-numbers-layout {
+  align-items: center;
+}
+
+.highlight-numbers-layout > div:first-child {
+  flex: 0 0 45%;
+  text-align: center;
+  border-right: 2px solid #334155;
+  padding-right: 50px;
+}
+
+.highlight-numbers-layout .number {
+  color: #86bc25;
+  font-size: 140px;
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 700;
+  line-height: 1;
+  margin-bottom: 10px;
+  text-shadow: 0 0 20px rgba(134, 188, 37, 0.3);
+}
+
+.highlight-numbers-layout .number-label {
+  font-size: 24px;
+  font-weight: 700;
+  color: #f8fafc;
+}
+
+/* Timeline Layout */
+.timeline-layout {
+  align-items: stretch;
+  display: flex;
+  height: stretch;
+  justify-content: space-between;
+  position: relative;
+  width: 100%;
+  margin-top: 50px;
+}
+
+.timeline-layout .timeline-line {
+  background-color: #334155;
+  height: 4px;
+  left: 0;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-2px);
+  width: 100%;
+  z-index: 0;
+}
+
+.timeline-item {
+  position: relative;
+  text-align: center;
+  width: 23%;
+}
+
+.timeline-item::after {
+  background-color: #0b1121;
+  border-radius: 50%;
+  border: 4px solid #86bc25;
+  content: '';
+  height: 20px;
+  left: 50%;
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 20px;
+  z-index: 1;
+  box-shadow: 0 0 15px rgba(134, 188, 37, 0.5);
+}
+
+.timeline-item .content-wrapper {
+  left: 0;
+  position: absolute;
+  width: 100%;
+}
+
+.timeline-item:nth-child(odd) .content-wrapper {
+  bottom: 50%;
+  margin-bottom: 35px;
+}
+
+.timeline-item:nth-child(even) .content-wrapper {
+  margin-top: 35px;
+  top: 50%;
+}
+
+.timeline-item h3 {
+  color: #f8fafc;
+  font-size: 22px;
+}
+
+/* Quote Layout */
+.quote-layout {
+  margin: 0 auto;
+  text-align: center;
+  width: 90%;
+  margin-top: 80px;
+}
+
+.quote-layout blockquote {
+  color: #f8fafc;
+  font-size: 46px;
+  font-weight: 700;
+  line-height: 1.5;
+  margin: 0 0 40px 0;
+  padding: 0 50px;
+  position: relative;
+}
+
+.quote-layout blockquote::before,
+.quote-layout blockquote::after {
+  color: #86bc25;
+  content: '"';
+  font-size: 100px;
+  line-height: 0;
+  position: absolute;
+  opacity: 0.2;
+}
+
+.quote-layout blockquote::before {
+  left: -20px;
+  top: 30px;
+}
+
+.quote-layout blockquote::after {
+  bottom: -10px;
+  right: -20px;
+}
+
+.quote-layout cite {
+  color: #86bc25;
+  font-size: 24px;
+  font-style: normal;
+  font-weight: 500;
+  letter-spacing: 2px;
+}
+
+/* Q&A Layout */
+.qa-layout {
+  margin: 0 auto;
+  text-align: center;
+  width: 100%;
+  align-self: center;
+}
+
+.qa-layout h2 {
+  font-size: 90px;
+  margin-bottom: 30px;
+  color: #86bc25;
+  font-family: 'Orbitron', sans-serif;
+  letter-spacing: 5px;
+}
+
+.qa-layout p {
+  font-size: 28px;
+  margin-bottom: 50px;
+}
+
+.qa-layout .contact-info {
+  background-color: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  padding: 20px 40px;
+  display: inline-block;
+  color: #f8fafc;
+  font-size: 24px;
+  font-weight: 500;
+}
+
+.qa-layout .contact-info i {
+  color: #86bc25;
+  margin-right: 15px;
+}
+
+/* Basic Lists without standard bullets for specific sections */
+.custom-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.custom-list li {
+  margin-bottom: 20px;
+  position: relative;
+  padding-left: 25px;
+}
+.custom-list li::before {
+  content: '>';
+  color: #86bc25;
+  position: absolute;
+  left: 0;
+  font-weight: bold;
+}
+    </style>
+</head>
+<body>
+
+<!-- Slide 1: Title_Slide -->
+<div class="slide-container" id="slide1">
+    <div class="title-layout">
+        <h2 style="color:#86bc25; font-size:32px; letter-spacing: 4px; margin-bottom: 20px;">TEAM C · 初赛方案</h2>
+        <h1>重塑销售旅程中的<br>人机协作模式</h1>
+        <hr>
+        <p class="subtitle">Star-Connect-Agent：驱动转化跃升的智能中枢</p>
+        <p class="mentor-info">
+            参赛选手：程学俊 | Monash University<br>
+            <span style="font-size: 16px; margin-top: 5px; display: inline-block;">
+                <i class="fa-regular fa-envelope"></i> jackcheng030910@outlook.com
+            </span>
+        </p>
+    </div>
+</div>
+
+<!-- Slide 2: Two_Column_Tiled_Text (Business Workflow & Collab) -->
+<div class="slide-container" id="slide2">
+    <h2 class="slide-title">业务重塑：定义新一代人机协作边界</h2>
+    <div class="content-area">
+        <div class="two-column tiled">
+            <div>
+                <h3>Workflow Redesign (任务重新分工)</h3>
+                <p style="margin-bottom: 20px;">摒弃销售人员包揽一切的低效模式，清晰界定 AI 在销售旅程中的角色与边界：</p>
+                <ul class="custom-list">
+                    <li><span class="highlight-text">AI 接管 (Takeover)：</span> 负责海量线索的自动化清洗、基础意图打标与无效数据剔除。</li>
+                    <li><span class="highlight-text">AI 辅助 (Assist)：</span> 在沟通环节，根据客户画像实时生成个性化跟进邮件与话术草稿。</li>
+                    <li><span class="highlight-text">人类专注 (Human Focus)：</span> 销售代表将 80% 精力聚焦于高净值客户的情感维系与最终商业谈判逼单。</li>
+                </ul>
+            </div>
+            <div>
+                <h3>Human-AI Collab (协作交互重构)</h3>
+                <p style="margin-bottom: 20px;">降低系统使用门槛，让工具真正赋能而非增加负担：</p>
+                <ul class="custom-list">
+                    <li><span class="highlight-text">对话式 UI (Conversational)：</span> 支持销售通过自然语言（语音/文本）直接下达查询或录入指令，告别繁琐的 CRM 表单填报。</li>
+                    <li><span class="highlight-text">主动推送 (Proactive Push)：</span> 转变“人找数据”为“数据找人”。系统在关键节点主动向销售企微推送包含上下文的 Next-Best-Action (最佳下一步) 建议。</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Slide 3: Tiled_Text_With_Icons (Technology - Insights & Decisions) -->
+<div class="slide-container" id="slide3">
+    <h2 class="slide-title">技术内核：洞察挖掘与领域本体构建</h2>
+    <div class="content-area">
+        <div class="tiled-content">
+            <div class="tile">
+                <div class="icon"><i class="fa-solid fa-microchip"></i></div>
+                <h3>Insight Mining (洞察挖掘)</h3>
+                <p>打破结构化数据局限。利用大语言模型深度解析客户通话录音 (ASR转换)、邮件往来及微信聊天记录，精准提取隐藏的客户痛点、预算信号与竞品提及，将非结构化文本转化为可行动的业务洞察。</p>
+            </div>
+            <div class="tile">
+                <div class="icon"><i class="fa-solid fa-chart-line"></i></div>
+                <h3>Decision Augmentation</h3>
+                <p>在关键决策节点提供增强建议。通过算法模型，在海量 Leads 中实现智能线索评分与路由分配；在跟进周期内，预测最佳触达时机，并动态推荐匹配客户当前生命周期的话术策略。</p>
+            </div>
+            <div class="tile">
+                <div class="icon"><i class="fa-solid fa-sitemap"></i></div>
+                <h3>Ontology (销售知识本体)</h3>
+                <p>构筑底座基石。定制化开发包含“客户意图分类树”、“产品功能与属性矩阵”、“B2B销售阶段流转定义”的知识图谱，支撑底层 Agent 进行严谨的业务理解与因果推理，避免大模型幻觉。</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Slide 4: Bleed_Image_Right (Agentic Capability) -->
+<div class="slide-container bleed-image-layout" id="slide4">
+    <div class="content-container">
+        <h2 class="slide-title">不仅仅是问答：<br>真正的 Agentic 系统</h2>
+        <div class="content-area">
+            <div class="bleed-text-side">
+                <p style="font-size: 22px; color: #f8fafc; margin-bottom: 25px;"><strong>突破单次问答 (Q&A) 的局限，赋予系统自主“思考”与“行动”的能力。</strong></p>
+                <p>Star-Connect-Agent 具备基于目标的<strong>自主规划能力 (Reasoning & Planning)</strong>。当接收到宏观指令（如：“分析近期流失客户原因”）时，它能自行拆解子任务。</p>
+                <p>同时，Agent 拥有强大的<strong>工具调用能力 (Tool Use)</strong>，能够跨系统调用 CRM 接口、邮件服务器或 BI 面板抓取数据，并进行<strong>多轮决策推理</strong>，最终向销售输出一份完整的策略报告与待执行的挽回邮件草稿。</p>
+            </div>
+        </div>
+    </div>
+    <div class="image-container">
+        <img
+            class="bleed-image-side"
+            src="https://images.unsplash.com/photo-1633412802994-5c058f151b66?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
+            alt="Futuristic digital brain concept, glowing nodes, dark background">
+    </div>
+</div>
+
+<!-- Slide 5: Image_Right_Text_Left (Architecture & CRM Integration) -->
+<div class="slide-container image-right-layout" id="slide5">
+    <h2 class="slide-title">核心功能实现与业务系统 (CRM) 集成</h2>
+    <div class="content-area">
+        <div class="two-column">
+            <div>
+                <ul class="custom-list" style="margin-top: 20px;">
+                    <li><span class="highlight-text">非侵入式 Copilot 架构：</span> Agent 作为独立的智能中间件悬浮于企业现有 IT 架构之上，避免对原有核心系统的推翻重构。</li>
+                    <li><span class="highlight-text">标准化 API 网关对接：</span> 通过 RESTful API 与主流系统（如 Salesforce, 纷享销客, 企业微信）建立双向高速数据通道，实现线索状态、跟进记录的实时同步。</li>
+                    <li><span class="highlight-text">事件驱动机制 (Webhook)：</span> 实时监听业务系统中的状态变更（如：客户赢单、线索沉睡超期），自动触发 Agent 内部的预设工作流，实现全天候的自动化营运。</li>
+                </ul>
+            </div>
+            <div>
+                <div class="image-wrapper"><img src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80" alt="Abstract software integration API connecting lines"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Slide 6: Highlighted_Numbers (Business & Org Value) -->
+<div class="slide-container" id="slide6">
+    <h2 class="slide-title">可量化的业务收益与组织价值评估</h2>
+    <div class="content-area">
+        <div class="two-column highlight-numbers-layout">
+            <div>
+                <div class="number">40%</div>
+                <div class="number-label">预计销售人效提升预期</div>
+            </div>
+            <div>
+                <h3 style="color: #86bc25; margin-bottom: 20px;">双维度的价值赋能</h3>
+                <p><strong>显性业务收益：</strong><br>通过 Agent 的智能清洗与精准洞察，大幅减少低价值事务耗时，提升核心线索的跟进密度与质量，预计有效线索转化率提升，同时降低潜在客户流失率。</p>
+                <p style="margin-top: 15px;"><strong>隐性组织价值：</strong><br>彻底打破“个人经验主义”。系统将 Top Sales 的优秀跟进策略、话术模板内化为 Agent 的知识本体，实现整个销售团队能力的标准化复制与整体底线拉齐。</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Slide 7: Area_Chart_For_Trends (ROI Projection) -->
+<div class="slide-container" id="slide7">
+    <h2 class="slide-title">系统效能飞跃预期轨迹</h2>
+    <div class="content-area">
+        <div class="area-chart-container">
+            <svg class="area-chart-svg" viewBox="0 0 1000 320">
+                <defs>
+                    <linearGradient id="area-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" style="stop-color:#86bc25;" stop-opacity="0.4"></stop>
+                        <stop offset="100%" style="stop-color:#86bc25;" stop-opacity="0.05"></stop>
+                    </linearGradient>
+                </defs>
+
+                <!-- Grid Lines -->
+                <g class="grid">
+                    <line x1="0" y1="40" x2="1000" y2="40" stroke-dasharray="4 4"></line>
+                    <line x1="0" y1="110" x2="1000" y2="110" stroke-dasharray="4 4"></line>
+                    <line x1="0" y1="180" x2="1000" y2="180" stroke-dasharray="4 4"></line>
+                    <line x1="0" y1="250" x2="1000" y2="250" stroke-dasharray="4 4"></line>
+                    <line x1="0" y1="320" x2="1000" y2="320"></line>
+                </g>
+
+                <!-- Chart Data: Flat for old CRM, then exponential rise -->
+                <path class="area-fill" d="M 0 250 L 250 250 L 500 180 L 750 80 L 1000 30 L 1000 320 L 0 320 Z"></path>
+                <polyline class="line-stroke" points="0,250 250,250 500,180 750,80 1000,30"></polyline>
+
+                <!-- Data Points -->
+                <g class="data-points">
+                    <circle class="data-point" cx="0" cy="250" r="6"></circle>
+                    <circle class="data-point" cx="250" cy="250" r="6"></circle>
+                    <circle class="data-point" cx="500" cy="180" r="6"></circle>
+                    <circle class="data-point" cx="750" cy="80" r="6"></circle>
+                    <circle class="data-point" cx="1000" cy="30" r="6"></circle>
+                </g>
+
+                <!-- Axis Labels -->
+                <g class="axis-labels y-axis-labels">
+                    <text x="-15" y="45">High</text>
+                    <text x="-15" y="255">Base</text>
+                </g>
+                  <g class="axis-labels x-axis-labels">
+                    <text x="0" y="350">传统 CRM 阶段</text>
+                    <text x="250" y="350">系统部署期</text>
+                    <text x="500" y="350">交互习惯养成</text>
+                    <text x="750" y="350">主动推送发力</text>
+                    <text x="1000" y="350">全面人机协同</text>
+                </g>
+            </svg>
+        </div>
+        <p class="chart-summary" style="margin-top: 35px; text-align: center; font-size: 18px;">
+            引入 Star-Connect-Agent 后，企业将突破传统依赖增加人力的线性增长瓶颈，依托 AI 洞察与决策增强实现指数级的转化效能跃升。
+        </p>
+    </div>
+</div>
+
+<!-- Slide 8: Styled_Bullet_Points (Execution Controls) -->
+<div class="slide-container" id="slide8">
+  <h2 class="slide-title">立刻解决方案：三项硬措施当天可启动</h2>
+    <div class="content-area">
+        <div class="bullet-list">
+            <ul>
+                <li>
+                    <i class="fa-solid fa-shield-halved"></i>
+          <strong>措施1：上线“脱敏前置网关”（解决隐私泄露）</strong>
+          在所有 Prompt 入模前执行手机号、邮箱、身份证、公司关键信息的自动掩码；默认拦截高危输入并写入审计日志。<br>
+          <span class="highlight-text">责任人：</span>安全负责人 + 平台工程师；
+          <span class="highlight-text">验收指标：</span>敏感字段泄露率降至 0，拦截命中率 >= 95%。
+                </li>
+                <li>
+          <i class="fa-solid fa-scale-balanced"></i>
+          <strong>措施2：高风险决策强制人工确认（解决幻觉与误判）</strong>
+          对报价、合同条款、折扣审批、客户承诺等关键动作启用 HITL 审批闸门，AI 只能给建议不能直接发出。<br>
+          <span class="highlight-text">责任人：</span>销售运营经理 + 法务接口人；
+          <span class="highlight-text">验收指标：</span>高风险动作 100% 人工确认，错误外发事件为 0。
+                </li>
+                <li>
+          <i class="fa-solid fa-users"></i>
+          <strong>措施3：先锋小组双周冲刺（解决落地阻力）</strong>
+          选 10 名一线销售做灰度试点，每周复盘“建议采用率、成单转化、单次跟进耗时”，保留原流程可回退。<br>
+          <span class="highlight-text">责任人：</span>销售总监 + PM；
+          <span class="highlight-text">验收指标：</span>建议采用率 >= 60%，单次跟进耗时下降 >= 25%。
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- Slide 9: Timeline (Roadmap) -->
+<div class="slide-container" id="slide9">
+  <h2 class="slide-title">90天落地计划：按周交付，不做空泛路线图</h2>
+    <div class="content-area">
+        <div class="timeline-layout">
+            <div class="timeline-line"></div>
+            <div class="timeline-item">
+                <div class="content-wrapper">
+          <h3>Week 1-2</h3>
+          <p style="font-size: 16px;">完成脱敏网关、审计日志、HITL 审批开关。交付标准：安全压测通过，关键链路可回放。</p>
+                </div>
+            </div>
+            <div class="timeline-item">
+                <div class="content-wrapper">
+          <h3>Week 3-6</h3>
+          <p style="font-size: 16px;">跑通 CRM/API + Insight Mining，生成 Next-Best-Action 建议并回写线索状态。交付标准：端到端成功率 >= 98%。</p>
+                </div>
+            </div>
+            <div class="timeline-item">
+                <div class="content-wrapper">
+          <h3>Week 7-10</h3>
+          <p style="font-size: 16px;">10人先锋组灰度上线，周度复盘并调参。交付标准：转化率提升 >= 15%，人工确认时延 <= 2 分钟。</p>
+                </div>
+            </div>
+            <div class="timeline-item">
+                <div class="content-wrapper">
+          <h3>Week 11-12</h3>
+          <p style="font-size: 16px;">扩展到 50 人并固化 SOP。交付标准：形成培训手册、风险台账、ROI 报告与推广决策。</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Slide 10: Action Checklist -->
+<div class="slide-container" id="slide10">
+  <h2 class="slide-title">答辩可直接落地的一页清单</h2>
+  <div class="content-area">
+    <div class="two-column tiled">
+      <div>
+        <h3>本周必须完成（Owner明确）</h3>
+        <ul class="custom-list">
+          <li>安全负责人：提交脱敏规则白名单/黑名单与误杀处理机制。</li>
+          <li>平台工程师：接通 CRM 沙箱与日志看板，保证全链路可追踪。</li>
+          <li>销售运营：定义 HITL 审批范围，发布“AI 建议不等于自动执行”制度。</li>
+        </ul>
+      </div>
+      <div>
+        <h3>30天可验证结果（KPI可量化）</h3>
+        <ul class="custom-list">
+          <li>效率：销售跟进准备时间下降 >= 25%。</li>
+          <li>质量：高潜线索识别准确率提升 >= 20%。</li>
+          <li>风险：敏感信息外泄事件为 0，合规审计可追溯率 100%。</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 11: Q&A -->
+<div class="slide-container" id="slide11">
+    <div class="qa-layout">
+        <h2>Q & A</h2>
+        <p style="color: #f8fafc;">Team C 初赛方案汇报完毕，感谢各位导师聆听。</p>
+        <p style="font-size: 20px; color: #64748b; margin-top: 40px; margin-bottom: 20px;">Project Repository / 概念验证代码库：</p>
+        <div class="contact-info">
+            <i class="fa-brands fa-github"></i> https://github.com/JackCheng030910/Star-Connect-Agent-
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

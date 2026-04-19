@@ -1,0 +1,141 @@
+\documentclass[aspectratio=169,12pt]{beamer}
+\usepackage[UTF8]{ctex}
+\usepackage{xcolor}
+\usepackage{hyperref}
+
+\usetheme{Madrid}
+\usecolortheme{default}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{footline}[frame number]
+\setbeamerfont{frametitle}{series=\bfseries}
+\setbeamerfont{title}{series=\bfseries}
+\setbeamercolor{structure}{fg=blue!70!black}
+\setbeamercolor{frametitle}{fg=blue!70!black}
+\setbeamercolor{title}{fg=blue!70!black}
+
+\title[Star-Connect Agent]{Star-Connect Agent / BenzMind}
+\subtitle{奔驰智能客户体验多智能体平台}
+\author{Deloitte Elite Challenge}
+\date{2026}
+
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\begin{frame}{1. 项目背景}
+\begin{itemize}
+  \item 豪华车销售链路长，客户决策慢，信息容易流失。
+  \item 线索分散在微信、小程序、展厅、电话、DMS 等多个系统。
+  \item 销售、售后、配置、体验之间缺少统一协同。
+  \item 传统 AI 工具只能做单点问答，不能支撑完整业务流程。
+\end{itemize}
+\end{frame}
+
+\begin{frame}{2. 核心痛点}
+\begin{itemize}
+  \item 客户信息需要重复录入，销售效率低。
+  \item 试驾、报价、成交阶段缺少统一跟进机制。
+  \item 售后发现换车意向时，无法自动转给销售。
+  \item 客户体验不连续，容易在 O2O 流转中流失。
+\end{itemize}
+\end{frame}
+
+\begin{frame}{3. 我们做了什么}
+\begin{itemize}
+  \item 搭建了一个多智能体协作平台。
+  \item 设计了 4 个 Agent：销售顾问、配置专家、售后助理、体验设计师。
+  \item 做了统一前端工作台，支持聊天、车型展厅、数据面板。
+  \item 做了后端路由、生命周期状态、事件流和自动转接机制。
+\end{itemize}
+\end{frame}
+
+\begin{frame}{4. 系统架构}
+\begin{block}{前端}
+客户交互、车型浏览、事件面板、业务闭环操作入口。
+\end{block}
+\begin{block}{后端}
+意图识别、Agent 路由、生命周期管理、Webhook 接入骨架。
+\end{block}
+\begin{block}{Agent 层}
+销售、配置、售后、体验四个专业角色协同处理不同业务域。
+\end{block}
+\end{frame}
+
+\begin{frame}{5. 用户使用流程}
+\begin{itemize}
+  \item 客户进入系统后，可以直接聊天咨询车型。
+  \item 系统根据意图自动路由到对应 Agent。
+  \item 系统会记录客户阶段：留资、试驾、报价、成交、售后。
+  \item 前端会显示事件时间线和当前客户阶段。
+\end{itemize}
+\end{frame}
+
+\begin{frame}{6. 业务闭环能力}
+\begin{itemize}
+  \item 支持线索登记，建立基础客户画像。
+  \item 支持试驾预约，形成可跟进事件。
+  \item 支持报价生成，推进成交阶段。
+  \item 支持售后到销售的自动转接，避免线索断层。
+\end{itemize}
+\end{frame}
+
+\begin{frame}{7. 解决了什么问题}
+\begin{itemize}
+  \item 解决了客户信息分散和重复录入的问题。
+  \item 解决了销售流程缺少统一承接的问题。
+  \item 解决了售后和销售之间没有转接机制的问题。
+  \item 解决了 AI 只会回答，不会参与业务流程的问题。
+\end{itemize}
+\end{frame}
+
+\begin{frame}{8. 带来的改变}
+\begin{itemize}
+  \item 从被动问答变成主动协同。
+  \item 从单点工具变成全链路中枢。
+  \item 从人工经验驱动变成规则和数据驱动。
+  \item 从业务割裂变成跨部门连续承接。
+\end{itemize}
+\end{frame}
+
+\begin{frame}{9. 价值体现}
+\begin{itemize}
+  \item 提升销售和售后协同效率。
+  \item 降低客户流失率。
+  \item 提升试驾、报价、成交的转化效率。
+  \item 降低新销售上手门槛，让经验可复用。
+\end{itemize}
+\end{frame}
+
+\begin{frame}{10. 没有考虑到什么}
+\begin{itemize}
+  \item 没有接入真实企业微信、CRM、DMS 生产系统，只做了骨架。
+  \item 没有做真实语音、图像、轨迹等多模态识别。
+  \item 没有做真实的权限控制、审批流和审计系统。
+  \item 没有做生产级高并发、容灾和监控体系。
+  \item 没有完整覆盖个人信息保护和合规治理流程。
+\end{itemize}
+\end{frame}
+
+\begin{frame}{11. 未来扩展}
+\begin{itemize}
+  \item 接入真实业务系统，实现 CRM 和 DMS 回写。
+  \item 接入企业微信，实现销售自动提醒和主动跟进。
+  \item 加入语音、图片、试驾轨迹等多模态输入。
+  \item 增加权限、审计、脱敏和合规机制。
+  \item 接入金融审批和库存查询，形成更完整的业务闭环。
+\end{itemize}
+\end{frame}
+
+\begin{frame}{12. 结尾总结}
+\begin{block}{一句话总结}
+这不是一个单点聊天机器人，而是一个面向豪华车销售全链路的智能协同系统。
+\end{block}
+\begin{itemize}
+  \item 它的价值不只是能答，而是能接、能转、能记、能推。
+  \item 当前版本已经完成了可演示闭环，下一步是接入真实业务系统。
+\end{itemize}
+\end{frame}
+
+\end{document}
